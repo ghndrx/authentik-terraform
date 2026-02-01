@@ -1,0 +1,23 @@
+# Example terraform.tfvars - Copy to terraform.tfvars and fill in your values
+# NEVER commit terraform.tfvars to git!
+
+# Authentik Connection (required)
+authentik_url   = "https://auth.example.com"
+authentik_token = "your-api-token-here"
+
+# Google OAuth (optional - leave empty to skip)
+google_client_id     = ""
+google_client_secret = ""
+
+# Application URLs (set the ones you want to configure)
+argocd_url         = "https://argocd.example.com"
+grafana_url        = "https://grafana.example.com"
+home_assistant_url = "https://home.example.com"
+immich_url         = "https://photos.example.com"
+uptime_kuma_url    = "https://status.example.com"
+sonarr_url         = "https://sonarr.example.com"
+radarr_url         = "https://radarr.example.com"
+prowlarr_url       = "https://prowlarr.example.com"
+
+# LDAP Configuration
+ldap_base_dn = "dc=ldap,dc=example,dc=com"

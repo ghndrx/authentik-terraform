@@ -1,0 +1,105 @@
+name: Deploy Authentik Configuration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  TF_VERSION: "1.7.0"
+
+jobs:
+  plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Create secrets.auto.tfvars
+        run: |
+          cat > secrets.auto.tfvars << EOF
+          authentik_url   = "${{ secrets.AUTHENTIK_URL }}"
+          authentik_token = "${{ secrets.AUTHENTIK_TOKEN }}"
+          
+          # Google OAuth (optional)
+          google_client_id     = "${{ secrets.GOOGLE_CLIENT_ID }}"
+          google_client_secret = "${{ secrets.GOOGLE_CLIENT_SECRET }}"
+          
+          # Application URLs
+          argocd_url        = "${{ secrets.ARGOCD_URL }}"
+          grafana_url       = "${{ secrets.GRAFANA_URL }}"
+          home_assistant_url = "${{ secrets.HOME_ASSISTANT_URL }}"
+          immich_url        = "${{ secrets.IMMICH_URL }}"
+          uptime_kuma_url   = "${{ secrets.UPTIME_KUMA_URL }}"
+          sonarr_url        = "${{ secrets.SONARR_URL }}"
+          radarr_url        = "${{ secrets.RADARR_URL }}"
+          prowlarr_url      = "${{ secrets.PROWLARR_URL }}"
+          EOF
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        with:
+          name: tfplan
+          path: tfplan
+
+  apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: plan
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Create secrets.auto.tfvars
+        run: |
+          cat > secrets.auto.tfvars << EOF
+          authentik_url   = "${{ secrets.AUTHENTIK_URL }}"
+          authentik_token = "${{ secrets.AUTHENTIK_TOKEN }}"
+          
+          # Google OAuth (optional)
+          google_client_id     = "${{ secrets.GOOGLE_CLIENT_ID }}"
+          google_client_secret = "${{ secrets.GOOGLE_CLIENT_SECRET }}"
+          
+          # Application URLs
+          argocd_url        = "${{ secrets.ARGOCD_URL }}"
+          grafana_url       = "${{ secrets.GRAFANA_URL }}"
+          home_assistant_url = "${{ secrets.HOME_ASSISTANT_URL }}"
+          immich_url        = "${{ secrets.IMMICH_URL }}"
+          uptime_kuma_url   = "${{ secrets.UPTIME_KUMA_URL }}"
+          sonarr_url        = "${{ secrets.SONARR_URL }}"
+          radarr_url        = "${{ secrets.RADARR_URL }}"
+          prowlarr_url      = "${{ secrets.PROWLARR_URL }}"
+          EOF
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
