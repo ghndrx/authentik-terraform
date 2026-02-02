@@ -3,14 +3,14 @@
 # Update the domain below to match your Authentik instance
 # =============================================================================
 
-# Decrypt secrets with SOPS
-data "sops_file" "secrets" {
-  source_file = "secrets.enc.yaml"
-}
-
+# Authentik Provider Configuration
+# Token provided via:
+# - GitHub Actions secrets (CI/CD)
+# - terraform.tfvars (local dev - never commit!)
+# - TF_VAR_authentik_token environment variable
 provider "authentik" {
   url   = var.authentik_url
-  token = data.sops_file.secrets.data["authentik_token"]
+  token = var.authentik_token
 }
 
 # =============================================================================

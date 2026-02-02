@@ -8,6 +8,8 @@ Infrastructure as Code for Authentik identity provider - manage applications, pr
 - **Proxy Authentication**: Home Assistant, Immich, Uptime Kuma, *arr stack
 - **LDAP Outpost**: For legacy application support
 - **Google OAuth Source**: Social login integration
+- **Security Policies**: Strong passwords, MFA, brute-force protection
+- **RBAC Groups**: Role-based access control for applications
 
 ## Quick Start
 
@@ -76,6 +78,8 @@ terraform apply
 ├── .github/workflows/deploy.yml  # CI/CD pipeline
 ├── main.tf                       # Authentik provider & brand config
 ├── variables.tf                  # All configurable variables
+├── security-policies.tf          # Password, MFA, brute-force policies
+├── rbac-groups.tf                # RBAC groups and access policies
 ├── app-*.tf                      # Application configurations
 ├── ldap-outpost.tf              # LDAP outpost config
 ├── source-google.tf             # Google OAuth source
@@ -143,12 +147,62 @@ terraform {
 }
 ```
 
+## Security Policies (security-policies.tf)
+
+This configuration includes enterprise-grade security controls:
+
+### Password Policy
+- Minimum 12 characters
+- Requires uppercase, lowercase, digits, and symbols
+- **Have I Been Pwned** integration - rejects breached passwords
+- **zxcvbn** password strength scoring (requires "strong" level 3/4)
+- Password reuse prevention (last 5 passwords)
+
+### Multi-Factor Authentication
+- TOTP authenticator apps (Google Authenticator, Authy, etc.)
+- WebAuthn/Passkeys (YubiKey, Touch ID, Windows Hello)
+- Static recovery codes (10 codes, 12 characters each)
+- Configurable enforcement: skip, deny, or force configuration
+
+### Brute Force Protection
+- Reputation-based blocking after 5 failed attempts
+- Blocks by IP address and username
+- Execution logging for audit trail
+
+### To Enable MFA Enforcement:
+1. Deploy these policies with `terraform apply`
+2. In Authentik UI: Edit your authentication flow
+3. Add the `mfa-validation` stage after the password stage
+4. Set `not_configured_action` to `deny` for strict enforcement
+
+## RBAC Groups (rbac-groups.tf)
+
+Role-based access control with three predefined groups:
+
+| Group | Purpose | Example Apps |
+|-------|---------|--------------|
+| Media | Media server access | Sonarr, Radarr, Prowlarr, Plex |
+| Infrastructure | DevOps/monitoring | Grafana, ArgoCD, Portainer |
+| Home Automation | Smart home | Home Assistant |
+
+Admins automatically have access to all groups. Bind policies to applications:
+
+```hcl
+resource "authentik_policy_binding" "grafana_infra_access" {
+  target = authentik_application.grafana.uuid
+  policy = authentik_policy_expression.infrastructure_access.id
+  order  = 0
+}
+```
+
 ## Security Notes
 
 - Never commit `terraform.tfvars` or any file with secrets
 - Use GitHub Actions secrets for CI/CD
 - API tokens should have minimal required permissions
 - Rotate tokens periodically
+- Enable execution logging for security audit trails
+- Review login events in Authentik's Events log regularly
 
 ## Requirements
 
