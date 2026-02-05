@@ -82,6 +82,12 @@ variable "prowlarr_url" {
   description = "Prowlarr URL for proxy auth"
 }
 
+variable "portainer_url" {
+  type        = string
+  default     = ""
+  description = "Portainer URL for SSO"
+}
+
 # LDAP Configuration
 variable "ldap_base_dn" {
   type        = string

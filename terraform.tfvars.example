@@ -18,6 +18,7 @@ uptime_kuma_url    = "https://status.example.com"
 sonarr_url         = "https://sonarr.example.com"
 radarr_url         = "https://radarr.example.com"
 prowlarr_url       = "https://prowlarr.example.com"
+portainer_url      = "https://portainer.example.com"
 
 # LDAP Configuration
 ldap_base_dn = "dc=ldap,dc=example,dc=com"

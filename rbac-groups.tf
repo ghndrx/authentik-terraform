@@ -55,20 +55,31 @@ resource "authentik_policy_expression" "home_automation_access" {
 }
 
 # -----------------------------------------------------------------------------
-# Example: Bind policy to an application
-# Uncomment and modify for your applications
+# Application Policy Bindings
+# Restrict app access by group membership
 # -----------------------------------------------------------------------------
-# resource "authentik_policy_binding" "sonarr_media_access" {
-#   target = authentik_application.sonarr.uuid
-#   policy = authentik_policy_expression.media_access.id
-#   order  = 0
-# }
-#
-# resource "authentik_policy_binding" "grafana_infra_access" {
-#   target = authentik_application.grafana.uuid
-#   policy = authentik_policy_expression.infrastructure_access.id
-#   order  = 0
-# }
+
+# Infrastructure apps - require Infrastructure group
+resource "authentik_policy_binding" "grafana_infra_access" {
+  target = authentik_application.grafana.uuid
+  policy = authentik_policy_expression.infrastructure_access.id
+  order  = 0
+}
+
+resource "authentik_policy_binding" "argocd_infra_access" {
+  target = authentik_application.argocd.uuid
+  policy = authentik_policy_expression.infrastructure_access.id
+  order  = 0
+}
+
+# Home Automation apps
+resource "authentik_policy_binding" "homeassistant_access" {
+  target = authentik_application.home_assistant.uuid
+  policy = authentik_policy_expression.home_automation_access.id
+  order  = 0
+}
+
+# Media apps - require Media group (handled in app-proxy-arr-stack.tf)
 
 # -----------------------------------------------------------------------------
 # Outputs
