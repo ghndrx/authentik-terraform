@@ -94,3 +94,20 @@ variable "ldap_base_dn" {
   default     = "dc=ldap,dc=example,dc=com"
   description = "LDAP base DN"
 }
+
+# Security Configuration
+variable "enable_mfa_flow" {
+  type        = bool
+  default     = false
+  description = "Use custom MFA authentication flow instead of default"
+}
+
+variable "mfa_enforcement" {
+  type        = string
+  default     = "configure"
+  description = "MFA enforcement mode: 'skip' (optional), 'configure' (prompt to set up), 'deny' (required)"
+  validation {
+    condition     = contains(["skip", "configure", "deny"], var.mfa_enforcement)
+    error_message = "MFA enforcement must be one of: skip, configure, deny"
+  }
+}

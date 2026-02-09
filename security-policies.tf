@@ -99,7 +99,7 @@ resource "authentik_stage_authenticator_validate" "mfa_validation" {
   # - skip: Don't require MFA if not configured
   # - deny: Block login if MFA not configured (after enabling, users need MFA)
   # - configure: Force users to set up MFA if not configured
-  not_configured_action = "configure"
+  not_configured_action = var.mfa_enforcement
   
   # Supported authenticator types
   device_classes = [

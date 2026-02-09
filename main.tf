@@ -58,7 +58,8 @@ resource "authentik_brand" "main" {
   branding_logo    = "/static/dist/assets/icons/icon_left_brand.svg"
   branding_favicon = "/static/dist/assets/icons/icon.png"
   
-  flow_authentication = data.authentik_flow.default_authentication.id
+  # Use MFA auth flow if enabled, otherwise default
+  flow_authentication = var.enable_mfa_flow ? authentik_flow.mfa_authentication.uuid : data.authentik_flow.default_authentication.id
   flow_invalidation   = data.authentik_flow.default_invalidation.id
 }
 

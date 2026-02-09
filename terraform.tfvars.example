@@ -22,3 +22,10 @@ portainer_url      = "https://portainer.example.com"
 
 # LDAP Configuration
 ldap_base_dn = "dc=ldap,dc=example,dc=com"
+
+# Security Configuration
+enable_mfa_flow = false      # Set to true to enable MFA authentication flow
+mfa_enforcement = "configure" # Options: skip, configure, deny
+# - skip: MFA optional, no prompt if not configured
+# - configure: Prompt users to set up MFA on login
+# - deny: Block login if MFA not configured (use after users have set up MFA)

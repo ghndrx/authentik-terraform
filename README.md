@@ -78,6 +78,7 @@ terraform apply
 ├── .github/workflows/deploy.yml  # CI/CD pipeline
 ├── main.tf                       # Authentik provider & brand config
 ├── variables.tf                  # All configurable variables
+├── authentication-flow.tf        # Custom MFA authentication flow
 ├── security-policies.tf          # Password, MFA, brute-force policies
 ├── rbac-groups.tf                # RBAC groups and access policies
 ├── app-*.tf                      # Application configurations
@@ -170,10 +171,33 @@ This configuration includes enterprise-grade security controls:
 - Execution logging for audit trail
 
 ### To Enable MFA Enforcement:
+
+**Option 1: Use the Custom MFA Authentication Flow (Recommended)**
+
+Set in `terraform.tfvars`:
+```hcl
+enable_mfa_flow = true
+mfa_enforcement = "configure"  # or "deny" for strict enforcement
+```
+
+This creates a complete authentication flow with:
+- User identification → Password → MFA validation → Session creation
+- Brute-force protection policy binding
+- Configurable MFA enforcement level
+
+**Option 2: Manual Configuration**
 1. Deploy these policies with `terraform apply`
 2. In Authentik UI: Edit your authentication flow
 3. Add the `mfa-validation` stage after the password stage
 4. Set `not_configured_action` to `deny` for strict enforcement
+
+### MFA Enforcement Levels
+
+| Level | Behavior |
+|-------|----------|
+| `skip` | MFA optional, no prompt if not configured |
+| `configure` | Prompts users to set up MFA on login (recommended for rollout) |
+| `deny` | Blocks login if MFA not configured (use after users have set up MFA) |
 
 ## RBAC Groups (rbac-groups.tf)
 

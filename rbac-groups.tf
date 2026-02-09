@@ -9,20 +9,20 @@
 
 # Media group - access to Sonarr, Radarr, Prowlarr, etc.
 resource "authentik_group" "media" {
-  name = "Media"
-  parent = authentik_group.users.id
+  name    = "Media"
+  parents = [authentik_group.users.id]
 }
 
 # Infrastructure group - access to monitoring, CI/CD tools
 resource "authentik_group" "infrastructure" {
-  name = "Infrastructure"
-  parent = authentik_group.users.id
+  name    = "Infrastructure"
+  parents = [authentik_group.users.id]
 }
 
 # Home Automation group - Home Assistant access
 resource "authentik_group" "home_automation" {
-  name = "Home Automation"
-  parent = authentik_group.users.id
+  name    = "Home Automation"
+  parents = [authentik_group.users.id]
 }
 
 # -----------------------------------------------------------------------------
