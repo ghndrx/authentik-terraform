@@ -88,6 +88,12 @@ variable "portainer_url" {
   description = "Portainer URL for SSO"
 }
 
+variable "proxmox_url" {
+  type        = string
+  default     = ""
+  description = "Proxmox VE URL for SSO (e.g., https://proxmox.example.com:8006)"
+}
+
 # LDAP Configuration
 variable "ldap_base_dn" {
   type        = string
