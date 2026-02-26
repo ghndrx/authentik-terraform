@@ -117,3 +117,29 @@ variable "mfa_enforcement" {
     error_message = "MFA enforcement must be one of: skip, configure, deny"
   }
 }
+
+# Brand Configuration
+variable "brand_domain" {
+  type        = string
+  default     = "auth.gregh.dev"
+  description = "Primary domain for Authentik brand configuration"
+}
+
+variable "brand_title" {
+  type        = string
+  default     = "Greg's Lab"
+  description = "Branding title displayed in Authentik UI"
+}
+
+# Session Security
+variable "session_duration" {
+  type        = string
+  default     = "hours=24"
+  description = "Session duration before requiring re-authentication (e.g., hours=24, days=7)"
+}
+
+variable "remember_me_duration" {
+  type        = string
+  default     = "days=30"
+  description = "Duration for 'remember me' sessions"
+}

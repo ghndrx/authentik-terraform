@@ -29,3 +29,11 @@ mfa_enforcement = "configure" # Options: skip, configure, deny
 # - skip: MFA optional, no prompt if not configured
 # - configure: Prompt users to set up MFA on login
 # - deny: Block login if MFA not configured (use after users have set up MFA)
+
+# Brand Configuration
+brand_domain = "auth.gregh.dev"  # Your Authentik domain
+brand_title  = "Greg's Lab"      # Title shown in Authentik UI
+
+# Session Security
+session_duration     = "hours=24"  # Session expires after 24 hours
+remember_me_duration = "days=30"   # "Remember me" lasts 30 days

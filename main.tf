@@ -52,9 +52,9 @@ data "authentik_brand" "default" {
 
 # Update brand with proper domain
 resource "authentik_brand" "main" {
-  domain           = "authentik.example.com"  # TODO: Update to your domain
+  domain           = var.brand_domain
   default          = false
-  branding_title   = "My Lab"                 # TODO: Update to your org name
+  branding_title   = var.brand_title
   branding_logo    = "/static/dist/assets/icons/icon_left_brand.svg"
   branding_favicon = "/static/dist/assets/icons/icon.png"
   

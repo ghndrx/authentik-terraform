@@ -70,14 +70,11 @@ resource "authentik_flow_stage_binding" "mfa" {
 # -----------------------------------------------------------------------------
 # Stage: User Login (Session Creation)
 # Final stage - create user session after successful auth
+# Uses secure_login stage from session-settings.tf for enhanced security
 # -----------------------------------------------------------------------------
-data "authentik_stage" "user_login" {
-  name = "default-authentication-login"
-}
-
 resource "authentik_flow_stage_binding" "login" {
   target = authentik_flow.mfa_authentication.uuid
-  stage  = data.authentik_stage.user_login.id
+  stage  = authentik_stage_user_login.secure_login.id
   order  = 40
 }
 
