@@ -37,3 +37,8 @@ brand_title  = "Greg's Lab"      # Title shown in Authentik UI
 # Session Security
 session_duration     = "hours=24"  # Session expires after 24 hours
 remember_me_duration = "days=30"   # "Remember me" lasts 30 days
+
+# Outpost Configuration (for standalone proxy outpost)
+authentik_host          = "https://authentik.walleye-frog.ts.net"  # Same as authentik_url usually
+authentik_host_insecure = false                                     # Set true only for self-signed certs in dev
+outpost_log_level       = "info"                                    # Options: debug, info, warning, error

@@ -143,3 +143,32 @@ variable "remember_me_duration" {
   default     = "days=30"
   description = "Duration for 'remember me' sessions"
 }
+
+# Outpost Configuration
+variable "authentik_host" {
+  type        = string
+  description = "Authentik host URL for outpost connection (e.g., https://authentik.walleye-frog.ts.net)"
+  default     = ""
+}
+
+variable "authentik_host_insecure" {
+  type        = bool
+  default     = false
+  description = "Skip TLS verification for Authentik host (use only for self-signed certs in dev)"
+}
+
+variable "outpost_log_level" {
+  type        = string
+  default     = "info"
+  description = "Log level for outposts (debug, info, warning, error)"
+  validation {
+    condition     = contains(["debug", "info", "warning", "error"], var.outpost_log_level)
+    error_message = "Log level must be one of: debug, info, warning, error"
+  }
+}
+
+variable "outpost_service_connection" {
+  type        = string
+  default     = null
+  description = "Service connection ID for outpost deployment (optional, for Docker/K8s integration)"
+}

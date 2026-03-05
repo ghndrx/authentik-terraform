@@ -81,7 +81,9 @@ terraform apply
 ├── authentication-flow.tf        # Custom MFA authentication flow
 ├── security-policies.tf          # Password, MFA, brute-force policies
 ├── rbac-groups.tf                # RBAC groups and access policies
+├── session-settings.tf           # Session security & network binding
 ├── app-*.tf                      # Application configurations
+├── proxy-outpost.tf              # Standalone proxy outpost config
 ├── ldap-outpost.tf              # LDAP outpost config
 ├── source-google.tf             # Google OAuth source
 └── outputs.tf                   # Useful outputs
@@ -132,6 +134,104 @@ resource "authentik_application" "myapp" {
   protocol_provider = authentik_provider_proxy.myapp.id
 }
 ```
+
+## Deploying the Proxy Outpost
+
+The proxy outpost handles forward authentication for applications that don't support OIDC natively. 
+
+### Why Standalone Outpost?
+
+The embedded outpost (running within Authentik) can experience issues like:
+- 404 errors: "no value given for required property pk"
+- Configuration complexity
+- Resource contention
+
+A **standalone proxy outpost** runs as a separate container and provides:
+- ✅ Better isolation and reliability
+- ✅ Independent scaling
+- ✅ Easier debugging
+- ✅ More flexible deployment options
+
+### Deployment Steps
+
+1. **Apply Terraform Configuration**
+   ```bash
+   terraform apply
+   ```
+   This creates the outpost configuration in Authentik.
+
+2. **Get Docker Compose Configuration**
+   ```bash
+   terraform output proxy_outpost_docker_compose > docker-compose-proxy-outpost.yml
+   ```
+
+3. **Get Outpost Token**
+   ```bash
+   terraform output -raw proxy_outpost_token
+   ```
+   Copy this token - you'll need it for the `AUTHENTIK_TOKEN` environment variable.
+
+4. **Deploy the Outpost**
+   
+   Edit the docker-compose file and replace `<get_from_terraform_output>` with the actual token:
+   
+   ```bash
+   nano docker-compose-proxy-outpost.yml
+   # Replace <get_from_terraform_output> with your token
+   
+   docker compose -f docker-compose-proxy-outpost.yml up -d
+   ```
+
+5. **Configure Your Reverse Proxy**
+
+   **For Traefik** (labels are pre-configured in the compose file):
+   ```yaml
+   # In your app's docker-compose.yml
+   labels:
+     - "traefik.http.routers.myapp.middlewares=authentik@docker"
+     - "traefik.http.middlewares.authentik.forwardauth.address=http://authentik-proxy-outpost:9000/outpost.goauthentik.io/auth/traefik"
+     - "traefik.http.middlewares.authentik.forwardauth.trustForwardHeader=true"
+     - "traefik.http.middlewares.authentik.forwardauth.authResponseHeaders=X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid"
+   ```
+
+   **For Caddy**:
+   ```
+   myapp.example.com {
+       forward_auth authentik-proxy-outpost:9000 {
+           uri /outpost.goauthentik.io/auth/caddy
+           copy_headers X-authentik-username X-authentik-groups X-authentik-email
+       }
+       reverse_proxy myapp:8080
+   }
+   ```
+
+   **For Nginx**:
+   ```nginx
+   location / {
+       auth_request /outpost.goauthentik.io/auth/nginx;
+       auth_request_set $auth_cookie $upstream_http_set_cookie;
+       add_header Set-Cookie $auth_cookie;
+       
+       proxy_pass http://myapp:8080;
+   }
+   
+   location /outpost.goauthentik.io {
+       proxy_pass http://authentik-proxy-outpost:9000;
+   }
+   ```
+
+6. **Verify the Outpost**
+   
+   Check the outpost status in Authentik UI:
+   - Go to **System > Outposts**
+   - "Standalone Proxy Outpost" should show as **Healthy** ✅
+
+### Troubleshooting
+
+- **Outpost not connecting**: Check `AUTHENTIK_TOKEN` is set correctly
+- **404 errors**: Verify `AUTHENTIK_HOST` matches your Authentik URL exactly
+- **TLS errors**: For self-signed certs, set `AUTHENTIK_INSECURE=true` (dev only)
+- **View logs**: `docker logs authentik-proxy-outpost`
 
 ## Terraform State
 
